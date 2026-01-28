@@ -95,8 +95,22 @@ async function startServer() {
   try {
     await connectDB();
 
-    app.listen(config.port, () => {
+    const server = app.listen(config.port, () => {
       console.log(`Server running on port ${config.port}`);
+    });
+
+    // Handle server errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${config.port} is already in use. Please ensure no other instance is running.`);
+        console.error('To fix this:');
+        console.error('1. Stop the other process using this port');
+        console.error('2. Or change the PORT in your .env file');
+        process.exit(1);
+      } else {
+        console.error('Server error:', error);
+        process.exit(1);
+      }
     });
   } catch (error) {
     console.error('Failed to start server:', error);
