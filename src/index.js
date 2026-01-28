@@ -15,16 +15,30 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// CORS Configuration - must be before routes
+const allowedOrigins = config.corsOrigin.split(',').map(o => o.trim());
 app.use(cors({ 
-  origin: config.corsOrigin.split(',').map(o => o.trim()),
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200
 }));
 
 // Log CORS configuration for debugging
 console.log('CORS Configuration:', {
-  allowedOrigins: config.corsOrigin.split(',').map(o => o.trim()),
+  allowedOrigins: allowedOrigins,
   credentials: true
 });
 
