@@ -12,10 +12,12 @@ import videoRoutes from './routes/videoRoutes.js';
 const app = express();
 
 // Middleware
-app.use(cors({ origin: config.corsOrigin }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
+app.use(cors({ 
+  origin: config.corsOrigin,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 // Serve static files (uploaded videos and audio) with CORS headers
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
