@@ -12,12 +12,22 @@ import videoRoutes from './routes/videoRoutes.js';
 const app = express();
 
 // Middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(cors({ 
   origin: config.corsOrigin.split(',').map(o => o.trim()),
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Log CORS configuration for debugging
+console.log('CORS Configuration:', {
+  allowedOrigins: config.corsOrigin.split(',').map(o => o.trim()),
+  credentials: true
+});
+
 // Serve static files (uploaded videos and audio) with CORS headers
 app.use('/uploads', (req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
