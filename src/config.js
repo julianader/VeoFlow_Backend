@@ -14,7 +14,7 @@ export const config = {
   googlePrivateKey: process.env.GOOGLE_PRIVATE_KEY,
   
   // CORS
-  corsOrigin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+  corsOrigin: process.env.CORS_ORIGIN || 'https://veoflow.netlify.app',
   
   // Storage
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
