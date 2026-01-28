@@ -1,6 +1,7 @@
 import { Storage } from '@google-cloud/storage';
 import path from 'path';
 import fs from 'fs';
+import { config } from '../config.js';
 
 class GCSService {
   constructor() {
@@ -8,10 +9,24 @@ class GCSService {
     this.keyFilePath = process.env.GOOGLE_APPLICATION_CREDENTIALS;
     
     // Initialize Google Cloud Storage
-    this.storage = new Storage({
-      keyFilename: this.keyFilePath,
-      projectId: process.env.GOOGLE_PROJECT_ID || 'veoflow-485315',
-    });
+    if (this.keyFilePath) {
+      this.storage = new Storage({
+        keyFilename: this.keyFilePath,
+        projectId: process.env.GOOGLE_PROJECT_ID || 'veoflow-485315',
+      });
+    } else if (config.googlePrivateKey && config.googleClientEmail) {
+      // Use credentials from environment variables (Railway deployment)
+      const credentials = {
+        type: 'service_account',
+        project_id: config.googleProjectId || 'veoflow-485315',
+        client_email: config.googleClientEmail,
+        private_key: config.googlePrivateKey.replace(/\\n/g, '\n'),
+      };
+      this.storage = new Storage({
+        credentials,
+        projectId: config.googleProjectId || 'veoflow-485315',
+      });
+    }
     
     this.bucket = this.storage.bucket(this.bucketName);
     

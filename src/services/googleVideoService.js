@@ -14,16 +14,31 @@ class GoogleVideoService {
     this.baseUrl = `https://${this.location}-aiplatform.googleapis.com/v1/projects/${this.projectId}/locations/${this.location}/publishers/google/models/${this.modelId}`;
     
     // Initialize Google Auth for REST API
-    this.auth = new GoogleAuth({
-      keyFilename: this.keyFilePath,
-      scopes: ['https://www.googleapis.com/auth/cloud-platform']
-    });
+    if (this.keyFilePath) {
+      this.auth = new GoogleAuth({
+        keyFilename: this.keyFilePath,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      });
+    } else if (config.googlePrivateKey && config.googleClientEmail) {
+      // Use credentials from environment variables (Railway deployment)
+      const credentials = {
+        type: 'service_account',
+        project_id: this.projectId,
+        client_email: config.googleClientEmail,
+        private_key: config.googlePrivateKey.replace(/\\n/g, '\n'),
+      };
+      this.auth = new GoogleAuth({
+        credentials,
+        scopes: ['https://www.googleapis.com/auth/cloud-platform']
+      });
+    }
     
     console.log('Google Vertex AI Veo 3 initialized:', {
       project: this.projectId,
       model: this.modelId,
       location: this.location,
-      hasKeyFile: !!this.keyFilePath
+      hasKeyFile: !!this.keyFilePath,
+      hasEnvCredentials: !!(config.googlePrivateKey && config.googleClientEmail)
     });
     
     // In-memory job storage

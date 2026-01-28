@@ -15,6 +15,19 @@ class GoogleTTSService {
         projectId: this.projectId,
       });
       console.log('Google Text-to-Speech initialized with service account');
+    } else if (config.googlePrivateKey && config.googleClientEmail) {
+      // Use credentials from environment variables (Railway deployment)
+      const credentials = {
+        type: 'service_account',
+        project_id: this.projectId,
+        client_email: config.googleClientEmail,
+        private_key: config.googlePrivateKey.replace(/\\n/g, '\n'),
+      };
+      this.client = new TextToSpeechClient({
+        credentials,
+        projectId: this.projectId,
+      });
+      console.log('Google Text-to-Speech initialized with environment credentials');
     } else {
       console.warn('Google Text-to-Speech not initialized - no credentials found');
     }
